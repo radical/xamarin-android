@@ -677,10 +677,27 @@ Copyright (C) 2011-2012 Xamarin. All rights reserved.
 </Target>
 
 <Target Name="_GetReferenceAssemblyPaths">
+	<PropertyGroup>
+		<_MinMSBuildVersionWithNewParamForWindows>15.8.165</_MinMSBuildVersionWithNewParamForWindows>
+		<_MinMSBuildVersionWithNewParamForMono>15.8.140</_MinMSBuildVersionWithNewParamForMono>
+
+		<_MSBuildHasNewFallbackParam Condition="( '$(MSBuildRuntimeType)' == 'Mono' and $(MSBuildVersion) &gt;= '$(_MinMSBuildVersionWithNewParamForMono)' ) or ( '$(MSBuildRuntimeType)' == 'Full' and $(MSBuildVersion) &gt;= '$(_MinMSBuildVersionWithNewParamForWindows)' )">true</_MSBuildHasNewFallbackParam>
+		<_MSBuildHasNewFallbackParam Condition="'$(_MSBuildHasNewFallbackParam)' == ''">false</_MSBuildHasNewFallbackParam>
+	</PropertyGroup>
+
 	<GetReferenceAssemblyPaths
+			Condition="'$(_MSBuildHasNewFallbackParam)' == 'true'"
+			TargetFrameworkMoniker="$(TargetFrameworkIdentifier),Version=v1.0"
+			RootPath="$(TargetFrameworkRootPath)"
+			TargetFrameworkFallbackSearchPaths="$(TargetFrameworkFallbackSearchPaths)">
+		<Output TaskParameter="ReferenceAssemblyPaths"    PropertyName="_XATargetFrameworkDirectories" />
+	</GetReferenceAssemblyPaths>
+
+	<GetReferenceAssemblyPaths
+			Condition="'$(_MSBuildHasNewFallbackParam)' != 'true'"
 			TargetFrameworkMoniker="$(TargetFrameworkIdentifier),Version=v1.0"
 			RootPath="$(TargetFrameworkRootPath)">
-		<Output TaskParameter="ReferenceAssemblyPaths" PropertyName="_XATargetFrameworkDirectories" />
+		<Output TaskParameter="ReferenceAssemblyPaths"    PropertyName="_XATargetFrameworkDirectories" />
 	</GetReferenceAssemblyPaths>
 </Target>
 
